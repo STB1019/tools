@@ -43,6 +43,13 @@ import it.unibs.ieeesb.arnaldoproject.ArnaldoProjectException;
 import it.unibs.ieeesb.arnaldoproject.Greeting;
 import it.unibs.ieeesb.arnaldotester.tests.TestGreeting;
 
+/**
+ * Entry point of the automatic tester
+ * 
+ * This class represents the entry point of the application
+ * 
+ * @author massi
+ */
 public class Main {
 	
 	private static final Logger LOGGER = LogManager.getLogger();
@@ -58,11 +65,19 @@ public class Main {
 		System.exit(0);
 	}
 
+	/**
+	 * Perform the actual work of the class
+	 * 
+	 * The function will System.exit whenever failure cannot be avoided.
+	 * Simply return otherwise
+	 * 
+	 * @param args the command arguments on the CLI
+	 */
 	private void doWork(String[] args) {
 		//parse command line information
 		try {
 			this.parseCommandLine(args);
-		} catch (ParseException | ClassNotFoundException e) {
+		} catch (ParseException e) {
 			e.printStackTrace();
 		}
 		
@@ -86,7 +101,17 @@ public class Main {
 		}
 	}
 
-	private void parseCommandLine(String[] args) throws ParseException, ClassNotFoundException {
+	/**
+	 * Perform the parsing of the command arguments (CLI)
+	 * 
+	 * After this function, instance variables are set. If "help" has been requested in
+	 * command line, the application stops immediately 
+	 * 
+	 * @param args the command argument fetched from CLI
+	 * @throws ParseException if we cannot parse the arguments on the CLI
+	 * @throws ClassNotFoundException 
+	 */
+	private void parseCommandLine(String[] args) throws ParseException {
 		Options options = new Options();
 
 		options.addOption("j", "jar", true, "The jar you want to test");
@@ -110,6 +135,16 @@ public class Main {
 		
 	}
 
+	/**
+	 * Performs the test requested in {@link #testToExecute}
+	 * 
+	 * @return a JSON object representing the test outcome
+	 * @throws MalformedURLException if something goes wrong
+	 * @throws InstantiationException if something goes wrong
+	 * @throws IllegalAccessException if something goes wrong
+	 * @throws ClassNotFoundException if something goes wrong
+	 * @throws ArnaldoProjectException if {@link #testToExecute}, {@link #interfaceName} or {@link #jarName} wer enot setup correctly
+	 */
 	private JSONObject doTest() throws MalformedURLException, InstantiationException, IllegalAccessException, ClassNotFoundException, ArnaldoProjectException {
 		TestHelper th = TestHelper.instance();
 		th.clear();
