@@ -35,4 +35,9 @@ public class TestGreeting {
 	public void test2() {
 		assertThat(this.g.getGreeting(), is("Hello world!"));
 	}
+	
+	@Test
+	public void testFailing() {
+		assertThat(5, is(3));
+	}
 }

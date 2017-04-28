@@ -6,6 +6,8 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -26,6 +28,8 @@ import org.clapper.util.classutil.ClassInfo;
 import org.clapper.util.classutil.InterfaceOnlyClassFilter;
 import org.clapper.util.classutil.NotClassFilter;
 import org.clapper.util.classutil.SubclassClassFilter;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.junit.runner.Computer;
 import org.junit.runner.Description;
 import org.junit.runner.JUnitCore;
@@ -61,7 +65,7 @@ public class Main {
 		}
 		
 		try {
-			this.doTest();
+			System.out.println(this.doTest());
 		} catch (MalformedURLException | InstantiationException | IllegalAccessException | ClassNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -80,7 +84,7 @@ public class Main {
 		this.logLevel = Level.valueOf(cmd.getOptionValue('l', "INFO"));
 	}
 
-	private void doTest() throws MalformedURLException, InstantiationException, IllegalAccessException, ClassNotFoundException {
+	private JSONObject doTest() throws MalformedURLException, InstantiationException, IllegalAccessException, ClassNotFoundException {
 		TestHelper th = TestHelper.instance();
 		th.clear();
 		th.setJarName(this.jarName);
@@ -113,14 +117,13 @@ public class Main {
 
 			@Override
 			public void testFailure(Failure failure) throws Exception {
-				LOGGER.info("Test {} has encountered the following general failure {}", failure.getDescription().getMethodName(), failure.getMessage());
-				LOGGER.catching(failure.getException());
+				LOGGER.warn("Test {} has encountered the following general failure {}", failure.getDescription().getMethodName(), failure.getMessage());
 				super.testFailure(failure);
 			}
 
 			@Override
 			public void testAssumptionFailure(Failure failure) {
-				LOGGER.info("Test {} has encountered a failing assertion {}", failure.getDescription().getMethodName(), failure.getException().getMessage());
+				LOGGER.warn("Test {} has encountered a failing assertion {}", failure.getDescription().getMethodName(), failure.getException().getMessage());
 				super.testAssumptionFailure(failure);
 			}
 
@@ -132,8 +135,42 @@ public class Main {
 		});
 		
 		Result result = jUnitCore.run(computer, TestGreeting.class);
-		LOGGER.info(result.toString());
+		LOGGER.info("Unit test executed. generating output");
 		
+		return this.generateOutput(result);
+	}
+	
+	private static Map<String, Object> createMap(Object... keyValueMapping) {
+		Map<String, Object> retVal = new HashMap<>();
+		String key = "";
+		Object value = null;
 		
+		for(int i=0; i<keyValueMapping.length; i++) {
+			if ((i % 2) == 0) {
+				//this is a key
+				key = keyValueMapping[i].toString();
+			} else {
+				value = keyValueMapping[i];
+				//add the key-value inside the map
+				retVal.put(key, value);
+			}
+		}
+		return retVal;
+	}
+	
+	private JSONObject generateOutput(Result result) {
+		JSONObject retVal = new JSONObject();
+		retVal.put("failure-count", Integer.toString(result.getFailureCount()));
+		retVal.put("total-ms-used", Long.toString(result.getRunTime()));
+		retVal.put("total-tests-run", Integer.toString(result.getRunCount()));
+		retVal.put("was-successful", Boolean.toString(result.wasSuccessful()));
+		
+		JSONArray failureList = new JSONArray();
+		result.getFailures().forEach(f -> {
+			failureList.put(new JSONObject(createMap("name", f.getDescription().getMethodName(), "cause", f.getMessage())));
+		});
+		retVal.put("failures", failureList);
+		
+		return retVal;
 	}
 }
