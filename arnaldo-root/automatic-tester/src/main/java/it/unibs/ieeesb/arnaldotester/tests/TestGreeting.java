@@ -18,7 +18,8 @@ public class TestGreeting {
 
 	@Before
 	public void setup() throws Exception {
-		this.g = TestHelper.instance().getInstance(Greeting.class);
+		//this.g = TestHelper.instance().getInstance(Greeting.class);
+		this.g = (Greeting) TestHelper.instance().getInstance();
 	}
 	
 	@After

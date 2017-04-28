@@ -26,6 +26,7 @@ public class TestHelper {
 	private static TestHelper singleton = null;
 	
 	private String jarName;
+	private String interfaceName;
 	private ClassLoader jarClassLoader;
 	
 	public static TestHelper instance() {
@@ -41,16 +42,32 @@ public class TestHelper {
 	
 	public void clear() {
 		this.jarName = null;
+		this.interfaceName = null;
 		this.jarClassLoader = null;
 	}
 	
-	public void setJarName(String jarName) throws MalformedURLException {
+	public void setHelper(String jarName, String interfaceName) throws MalformedURLException {
 		this.jarName = jarName;
 		this.jarClassLoader = this.getJarFileClassLoader(this.jarName);
+		this.interfaceName = interfaceName;
+	}
+	
+	public boolean checkHelper() {
+		Object retVal = null;
+		try {
+			retVal = this.getInstance();
+		} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+			return false;
+		}
+		return retVal != null;
 	}
 
-	public <CLAZZ> CLAZZ getInstance(Class<CLAZZ> interfaceToFind) throws InstantiationException, IllegalAccessException, ClassNotFoundException {
+	private <CLAZZ> CLAZZ getInstance(Class<CLAZZ> interfaceToFind) throws InstantiationException, IllegalAccessException, ClassNotFoundException {
 		return this.findInterfaceInJar(interfaceToFind).newInstance();
+	}
+	
+	public Object getInstance() throws InstantiationException, IllegalAccessException, ClassNotFoundException {
+		return this.findInterfaceInJar(this.jarClassLoader.loadClass(this.interfaceName)).newInstance();
 	}
 	
 	private ClassLoader getJarFileClassLoader(String jarFile) throws MalformedURLException {
