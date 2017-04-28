@@ -54,9 +54,29 @@ public class Main {
 	
 	private static final Logger LOGGER = LogManager.getLogger();
 
+	/**
+	 * The path (relative to CWD) representing the jar to test.
+	 * Must end with ".jar".
+	 * For example "common-interface-impl-example-0.1-SNAPSHOT.jar"
+	 */
 	private String jarName;
+	/**
+	 * The symbolic name of the interface each jar to test needs to implement.
+	 * There must be only a single class implementing such interface inside the {@link #jarName} jar file.
+	 * 
+	 * For example "it.unibs.ieeesb.arnaldotester.Greeting".
+	 */
 	private String interfaceName;
+	/**
+	 * The symbolic name of the class testing any implementation of {@link #interfaceName}.
+	 * This class must be located inside the current application jar; furthermore, it has to be a JUnit
+	 * "test case".
+	 * For example "it.unibs.ieeesb.arnaldotester.tests.TestGreeting"
+	 */
 	private String testToExecute;
+	/**
+	 * The level each logger will log information
+	 */
 	private Level logLevel;
 
 	public static void main(String[] args) {
@@ -207,6 +227,14 @@ public class Main {
 		return this.generateOutput(result);
 	}
 	
+	/**
+	 * Check if {@link #testToExecute} variable has been set correctly
+	 * 
+	 * This mainly means if there is a class named like <tt>name</tt>
+	 * 
+	 * @param name the test to check
+	 * @return true if <tt>name</tt> is valid, false otherwise
+	 */
 	private boolean checkTestCase(String name) {
 		try {
 			Class<?> tc = Class.forName(name);
@@ -222,6 +250,13 @@ public class Main {
 		return true;
 	}
 	
+	/**
+	 * An utility method used to generate in a oneline-way a map instance
+	 * @param keyValueMapping a sequence of objects. The sequence can be viewed as a list of pairs. The first value of the pair is the key of an object while
+	 * 	the second one is the value associated to the previous key. For example <code>createMap("a", Integer.valueOf(5), "b", Boolean.valueOf(true));</code>
+	 * 	will generate a map with 2 keys, "a" and "b".
+	 * @return a map instance
+	 */
 	private static Map<String, Object> createMap(Object... keyValueMapping) {
 		Map<String, Object> retVal = new HashMap<>();
 		String key = "";
@@ -240,6 +275,22 @@ public class Main {
 		return retVal;
 	}
 	
+	/**
+	 * Given the <tt>result</tt> from Junit engine, the function will produce a JSONObject
+	 * representing the information to print out to the stdout.
+	 * 
+	 * The output JSON will contain:
+	 * <ul>
+	 * 	<li>failure-count</li>
+	 * 	<li>total-ms-used</li>
+	 * 	<li>total-tests-run</li>
+	 * 	<li>was-successful</li>
+	 * 	<li>feailures</li>
+	 * </ul>
+	 * 
+	 * @param result the outcome the test {@link #testToExecute} for the implementation of {@link #interfaceName}
+	 * @return a JSON object
+	 */
 	private JSONObject generateOutput(Result result) {
 		JSONObject retVal = new JSONObject();
 		retVal.put("failure-count", Integer.toString(result.getFailureCount()));

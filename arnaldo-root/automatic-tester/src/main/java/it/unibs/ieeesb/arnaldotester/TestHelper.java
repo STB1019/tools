@@ -17,18 +17,61 @@ import org.clapper.util.classutil.ClassInfo;
 import org.clapper.util.classutil.InterfaceOnlyClassFilter;
 import org.clapper.util.classutil.NotClassFilter;
 import org.clapper.util.classutil.SubclassClassFilter;
+import org.junit.internal.runners.model.EachTestNotifier;
 
+import it.unibs.ieeesb.arnaldotester.tests.TestGreeting;
 import junit.framework.TestCase;
 
+/**
+ * A singleton class used to communicate between {@link Main} and {@link TestCase} class
+ * 
+ * An example of {@link TestCase} is {@link TestGreeting}. Since parametrized constructors seems not to be
+ * allowed in Junit framework, we need another method to pass variables to {@link TestCase}s.
+ * One way is to have a data structure common between {@link Main} and each {@link TestCase}.
+ * This data structure is the singleton {@link TestHelper}.
+ * 
+ * You can fetch the singleton via {@link TestHelper#instance()}.
+ * 
+ * If you want to set the data that will be exploted by {@link TestCase}, you need to call:
+ * <pre>{@code 
+ * 	TestHelper.instance().clear(); 
+ * 	TestHelper.instance().setHelper("jarname.jar", "my.personal.interface.Interface");
+ * }</pre>
+ * 
+ * Then, you can use {@link TestHelper} to fetch an implementation of the interface set in {@link #setHelper(String, String)} from the specified jar
+ * via {@link #getInstance()}.
+ * 
+ * <p><b>Note</b>: Remember, {@link TestHelper} will gneerate the new instance via the empty constructor of the implementation!</p>
+ * 
+ * @author massi
+ *
+ */
 public class TestHelper {
 	
 	private static final Logger LOGGER = LogManager.getLogger();
 	private static TestHelper singleton = null;
 	
+	/**
+	 * The absolute file of the jar containing the implementation of {@link #interfaceName}.
+	 * See {@link Main}.
+	 */
 	private String jarName;
+	/**
+	 * The symbolic name of the interface whose implementation we're looking for.
+	 * 
+	 * See {@link Main}
+	 */
 	private String interfaceName;
+	/**
+	 * The classloader which allows us to retrieve classes from {@link #jarName}
+	 */
 	private ClassLoader jarClassLoader;
 	
+	/**
+	 * Method used to retrieve the singleton instance of {@link TestHelper}
+	 * 
+	 * @return the singleton instance.
+	 */
 	public static TestHelper instance() {
 		if (singleton == null) {
 			singleton = new TestHelper();
@@ -40,18 +83,34 @@ public class TestHelper {
 		this.clear();
 	}
 	
+	/**
+	 * Clear the data inside this instance.
+	 * Set it via {@link #setHelper(String, String)}
+	 */
 	public void clear() {
 		this.jarName = null;
 		this.interfaceName = null;
 		this.jarClassLoader = null;
 	}
 	
+	/**
+	 * Set the mandatory data for this instance.
+	 * 
+	 * Clear it via {@link #clear()}
+	 * @param jarName the file path (relative to CWD) of the jar file to test
+	 * @param interfaceName the symbolic name of the interface we're looking for inside <tt>jarName</tt>. For example "it.unibs.ieeesb.arnaldotester.Greeting"
+	 * @throws MalformedURLException if something goes wrong
+	 */
 	public void setHelper(String jarName, String interfaceName) throws MalformedURLException {
 		this.jarName = jarName;
 		this.jarClassLoader = this.getJarFileClassLoader(this.jarName);
 		this.interfaceName = interfaceName;
 	}
 	
+	/**
+	 * Check if {@link #setHelper(String, String)} functions was correct or not
+	 * @return true if everything is good; false otherwise
+	 */
 	public boolean checkHelper() {
 		Object retVal = null;
 		try {
