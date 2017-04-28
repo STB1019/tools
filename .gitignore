@@ -50,5 +50,7 @@ local.properties
 .scala_dependencies
 .worksheet
 
+RemoteSystemsTempFiles
+
 #MAVEN GITIGNORE
 target/
