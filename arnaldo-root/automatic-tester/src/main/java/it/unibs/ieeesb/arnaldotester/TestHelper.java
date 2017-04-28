@@ -41,7 +41,7 @@ import junit.framework.TestCase;
  * Then, you can use {@link TestHelper} to fetch an implementation of the interface set in {@link #setHelper(String, String)} from the specified jar
  * via {@link #getInstance()}.
  * 
- * <p><b>Note</b>: Remember, {@link TestHelper} will gneerate the new instance via the empty constructor of the implementation!</p>
+ * <p><b>Note</b>: Remember, {@link TestHelper} will generate the new instance via the empty constructor of the implementation!</p>
  * 
  * @author massi
  *
@@ -119,10 +119,6 @@ public class TestHelper {
 			return false;
 		}
 		return retVal != null;
-	}
-
-	private <CLAZZ> CLAZZ getInstance(Class<CLAZZ> interfaceToFind) throws InstantiationException, IllegalAccessException, ClassNotFoundException {
-		return this.findInterfaceInJar(interfaceToFind).newInstance();
 	}
 	
 	public Object getInstance() throws InstantiationException, IllegalAccessException, ClassNotFoundException {

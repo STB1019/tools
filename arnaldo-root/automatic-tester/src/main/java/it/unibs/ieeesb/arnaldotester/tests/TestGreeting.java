@@ -18,7 +18,7 @@ public class TestGreeting {
 
 	@Before
 	public void setup() throws Exception {
-		//this.g = TestHelper.instance().getInstance(Greeting.class);
+		//MANDATORY: be sure to call this line to fetch an instance of the implementation
 		this.g = (Greeting) TestHelper.instance().getInstance();
 	}
 	
